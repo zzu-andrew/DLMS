@@ -6,7 +6,6 @@ project (DLMS
         LANGUAGES CXX
         )
 
-
 # Linux 分布式监控系统
 set (CPACK_PACKAGE_NAME DLMS)
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Distributed Linux monitoring system")
@@ -15,17 +14,19 @@ set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set (CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 
-
-
 message(STATUS　${CPACK_PACKAGE_VERSION})
-
-
-
-
 
 
 add_subdirectory(3rd/glog)
 
+
+add_executable(dlms src/dlms/dlms.cpp)
+target_include_directories(dlms
+        PUBLIC inc
+        PUBLIC src/dlms)
+
+target_link_libraries(dlms
+        PUBLIC glog)
 
 
 
