@@ -30,3 +30,31 @@ int main(int argc, char* argv[]) {
 }
 
 
+int32_t CDlms::Init() {
+
+
+
+    return 0;
+}
+
+int32_t CDlms::Start() {
+    return 0;
+}
+
+int32_t CDlms::Stop() {
+    return 0;
+}
+
+int32_t CDlms::Exit() {
+    return 0;
+}
+
+IPlugin *CDlms::GetPluginByName(std::string &pluginName) {
+
+    auto iter = m_mapPlugin.find(pluginName);
+    if (iter == m_mapPlugin.end()) {
+        return nullptr;
+    }
+
+    return iter->second;
+}

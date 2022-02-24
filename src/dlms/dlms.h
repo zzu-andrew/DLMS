@@ -4,23 +4,31 @@
 
 #ifndef DLMS_DLMS_H
 #define DLMS_DLMS_H
+#include <string>
+#include <map>
 
+#include "plugin.h"
 #include <dlms_bash.h>
 
 class CDlms : public IDlms {
 public:
     ~CDlms() override = default;
 
-    virtual int32_t Init() = 0;
+    int32_t Init() override;
 
-    virtual int32_t Start() = 0;
+    int32_t Start() override;
 
-    virtual int32_t Stop() = 0;
+    int32_t Stop() override;
 
-    virtual int32_t Exit() = 0;
+    int32_t Exit() override;
+
+    IPlugin* GetPluginByName(std::string& pluginName) override;
+
+
+
 
 private:
-
+    std::map<std::string, IPlugin*> m_mapPlugin;
 
 };
 

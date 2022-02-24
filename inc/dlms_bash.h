@@ -6,6 +6,7 @@
 #define DLMS_DLMS_BASH_H
 #include <iostream>
 
+class IPlugin;
 class IDlms {
 public:
     virtual ~IDlms() = default;
@@ -37,6 +38,13 @@ public:
      * @return 0:成功，其他：失败
      */
     virtual int32_t Exit() = 0;
+
+    /**
+     * @brief 获取插件对象
+     *
+     * @return nullptr:失败，其他：成功
+     */
+    virtual IPlugin *GetPluginByName(std::string &pluginName) = 0;
 };
 
 
