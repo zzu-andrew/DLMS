@@ -7,6 +7,11 @@
 #include <iostream>
 #include "dlms_bash.h"
 
+/*
+ * 实际项目中随时可以替换成动态库插件形式，这里为demo代码采用直接链接编译的方式使用
+ * */
+
+
 class IPlugin {
 public:
     enum PluginStatus : uint8_t {
