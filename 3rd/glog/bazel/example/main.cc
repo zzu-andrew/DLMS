@@ -1,4 +1,3 @@
-#include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <glog/stl_logging.h>
 
@@ -7,7 +6,6 @@ int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   // Optional: parse command line flags
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   LOG(INFO) << "Hello, world!";
 

@@ -20,11 +20,13 @@ message(STATUS　${CPACK_PACKAGE_VERSION})
 add_subdirectory(3rd/glog)
 
 
-add_executable(dlms src/dlms/dlms.cpp)
+add_executable(dlms
+        src/dlms/dlms.cpp)
 target_include_directories(dlms
         PUBLIC inc
         PUBLIC src/dlms)
-
+target_link_directories(dlms
+        PUBLIC lib)
 target_link_libraries(dlms
         PUBLIC glog)
 
