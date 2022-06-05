@@ -18,7 +18,7 @@ message(STATUS　${CPACK_PACKAGE_VERSION})
 
 
 add_subdirectory(3rd/glog)
-
+add_subdirectory(3rd/civetweb)
 
 add_executable(dlms
         src/dlms/dlms.cpp)
@@ -29,6 +29,11 @@ target_link_directories(dlms
         PUBLIC lib)
 target_link_libraries(dlms
         PUBLIC glog)
+
+
+
+
+
 
 
 
