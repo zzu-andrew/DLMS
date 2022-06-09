@@ -9,6 +9,7 @@
 
 #include "plugin.h"
 #include <dlms_bash.h>
+#include "plugin_manager.h"
 
 class CDlms : public IDlms {
 public:
@@ -20,15 +21,14 @@ public:
 
     int32_t Stop() override;
 
-    int32_t Exit() override;
+    int32_t Reset() override;
 
-    IPlugin* GetPluginByName(std::string& pluginName) override;
-
+    Plugin* GetPlugin(std::string& pluginName) override;
 
 
 
 private:
-    std::map<std::string, IPlugin*> m_mapPlugin;
+    PluginManager pluginManager;
 
 };
 
