@@ -11,6 +11,7 @@
 #include <dlms_bash.h>
 #include "plugin_manager.h"
 
+
 class CDlms : public IDlms {
 public:
     ~CDlms() override = default;
@@ -29,6 +30,18 @@ public:
 
 private:
     PluginManager pluginManager;
+
+
+};
+
+
+
+class CConfig : public IConfig {
+public:
+    ~CConfig() override = default;
+
+    int32_t ParseCommandLine(int32_t argc, char* argv[]);
+
 
 };
 

@@ -48,4 +48,25 @@ public:
 };
 
 
+class IConfig {
+public:
+    virtual ~IConfig() = default;
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
 #endif //DLMS_DLMS_BASH_H
