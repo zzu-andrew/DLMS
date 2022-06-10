@@ -71,9 +71,11 @@ int main(int argc, char* argv[]) {
 
     LOG(INFO) << "Hello, world!";
 
+    std::string data;
+    data = 'a';
 
-
-    std::cout << "=====" << std::endl;
+    data = 65;
+    std::cout << data << std::endl;
 
     //...... DoSomething
     //Shutdown google's logging library.
@@ -116,50 +118,49 @@ Plugin *CDlms::GetPlugin(std::string &pluginName) {
     return nullptr;
 }
 
-
-
+//#define GET_CASE_INFO(X)                            \
+//do {                                                \
+//    case X:                                         \
+//    \
+//                                                    \
+//                                                    };
 int32_t CConfig::ParseCommandLine(int32_t argc, char **argv) {
 
 
 
-        int result;
+    int ch;
 
-        opterr = 0;  //使getopt不行stderr输出错误信息
-
-        while( (result = getopt(argc, argv, "ab:c::")) != -1 )
+    opterr = 0;  //使getopt不行stderr输出错误信息
+    std::string opts = "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:"
+                       "A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:R:S:T:U:V:W:X:Y:Z:";
+    while( (ch = getopt(argc, argv, opts.c_str())) != -1 )
+    {
+        switch(ch)
         {
-            switch(result)
-            {
-                case 'a':
-                    printf("option=a, optopt=%c, optarg=%s\n", optopt, optarg);
-                    break;
-                case 'b':
-                    printf("option=b, optopt=%c, optarg=%s\n", optopt, optarg);
-                    break;
-                case 'c':
-                    printf("option=c, optopt=%c, optarg=%s\n", optopt, optarg);
-                    break;
-                case '?':
-                    printf("result=?, optopt=%c, optarg=%s\n", optopt, optarg);
-                    break;
-                default:
-                    printf("default, result=%c\n",result);
-                    break;
-            }
-            printf("argv[%d]=%s\n", optind, argv[optind]);
+            case 'a':
+                printf("option=a, optopt=%c, optarg=%s\n", optopt, optarg);
+                break;
+            case 'b':
+                printf("option=b, optopt=%c, optarg=%s\n", optopt, optarg);
+                break;
+            case 'c':
+                printf("option=c, optopt=%c, optarg=%s\n", optopt, optarg);
+                break;
+            case '?':
+                printf("result=?, optopt=%c, optarg=%s\n", optopt, optarg);
+                break;
+            default:
+                printf("default, result=%c\n",ch);
+                break;
         }
-        printf("result=-1, optind=%d\n", optind);   //看看最后optind的位置
-
-        for(result = optind; result < argc; result++)
-            printf("-----argv[%d]=%s\n", result, argv[result]);
-
-        //看看最后的命令行参数，看顺序是否改变了哈。
-        for(result = 1; result < argc; result++)
-            printf("\nat the end-----argv[%d]=%s\n", result, argv[result]);
-        return 0;
-
-
+        printf("argv[%d]=%s\n", optind, argv[optind]);
+    }
+    printf("result=-1, optind=%d\n", optind);   //看看最后optind的位置
 
 
     return 0;
+
+
+
+
 }

@@ -6,10 +6,12 @@
 #define DLMS_DLMS_H
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "plugin.h"
 #include <dlms_bash.h>
 #include "plugin_manager.h"
+#include "json_proxy.h"
 
 
 class CDlms : public IDlms {
@@ -43,6 +45,9 @@ public:
     int32_t ParseCommandLine(int32_t argc, char* argv[]);
 
 
+private:
+    std::unordered_map<char, std::string> config;
+    JsonProxy* jsonProxy;
 };
 
 
