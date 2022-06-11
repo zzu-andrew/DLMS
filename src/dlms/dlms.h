@@ -14,6 +14,19 @@
 #include "json_proxy.h"
 
 
+
+class CConfig : public IConfig {
+public:
+    ~CConfig() override = default;
+
+    int32_t ParseCommandLine(int32_t argc, char* argv[]);
+
+
+private:
+    std::unordered_map<char, std::string> configMap;
+    JsonProxy* jsonProxy;
+};
+
 class CDlms : public IDlms {
 public:
     ~CDlms() override = default;
@@ -28,26 +41,12 @@ public:
 
     Plugin* GetPlugin(std::string& pluginName) override;
 
-
-
-private:
-    PluginManager pluginManager;
-
-
-};
-
-
-
-class CConfig : public IConfig {
-public:
-    ~CConfig() override = default;
-
     int32_t ParseCommandLine(int32_t argc, char* argv[]);
 
 
 private:
-    std::unordered_map<char, std::string> config;
-    JsonProxy* jsonProxy;
+    PluginManager pluginManager;
+    CConfig        config;
 };
 
 

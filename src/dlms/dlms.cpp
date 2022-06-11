@@ -38,8 +38,6 @@ void JsonTest() {
 
 
 
-
-
     // 也可以通过直接赋值方式创建json对象，两种方式创建结果相同
     json j2 = {
             {"pi", 3.141},
@@ -68,14 +66,18 @@ int main(int argc, char* argv[]) {
 
     google::InitGoogleLogging(argv[0]);
     FLAGS_log_dir = "./log";
-
     LOG(INFO) << "Hello, world!";
 
-    std::string data;
-    data = 'a';
+    CDlms dlms;
+    // 1. 解析命令行参数
+    dlms.ParseCommandLine(argc, argv);
 
-    data = 65;
-    std::cout << data << std::endl;
+
+
+
+
+
+
 
     //...... DoSomething
     //Shutdown google's logging library.
@@ -118,49 +120,59 @@ Plugin *CDlms::GetPlugin(std::string &pluginName) {
     return nullptr;
 }
 
-//#define GET_CASE_INFO(X)                            \
-//do {                                                \
-//    case X:                                         \
-//    \
-//                                                    \
-//                                                    };
-int32_t CConfig::ParseCommandLine(int32_t argc, char **argv) {
+int32_t CDlms::ParseCommandLine(int32_t argc, char **argv) {
+    return config.ParseCommandLine(argc, argv);
+}
 
+#define POINTER_SAFE(lp)        ((nullptr == lp) ? "null" : lp)
 
+#define GET_CASE_INFO(X)                                                \
+    case X:                                                             \
+      configMap.emplace(std::make_pair(X, POINTER_SAFE(optarg)));       \
+      break;
+
+int32_t CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
 
     int ch;
-
-    opterr = 0;  //使getopt不行stderr输出错误信息
     std::string opts = "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:"
                        "A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:R:S:T:U:V:W:X:Y:Z:";
     while( (ch = getopt(argc, argv, opts.c_str())) != -1 )
     {
         switch(ch)
         {
-            case 'a':
-                printf("option=a, optopt=%c, optarg=%s\n", optopt, optarg);
-                break;
-            case 'b':
-                printf("option=b, optopt=%c, optarg=%s\n", optopt, optarg);
-                break;
-            case 'c':
-                printf("option=c, optopt=%c, optarg=%s\n", optopt, optarg);
-                break;
+            GET_CASE_INFO('a');
+            GET_CASE_INFO('b');
+            GET_CASE_INFO('c');
+            GET_CASE_INFO('d');
+            GET_CASE_INFO('e');
+            GET_CASE_INFO('f');
+            GET_CASE_INFO('g');
+            GET_CASE_INFO('h');
+            GET_CASE_INFO('i');
+            GET_CASE_INFO('j');
+            GET_CASE_INFO('k');
+            GET_CASE_INFO('l');
+            GET_CASE_INFO('m');
+            GET_CASE_INFO('n');
+            GET_CASE_INFO('o');
+            GET_CASE_INFO('p');
+            GET_CASE_INFO('q');
+            GET_CASE_INFO('r');
+            GET_CASE_INFO('s');
+            GET_CASE_INFO('t');
+            GET_CASE_INFO('u');
+            GET_CASE_INFO('v');
+            GET_CASE_INFO('w');
+            GET_CASE_INFO('x');
+            GET_CASE_INFO('y');
+            GET_CASE_INFO('z');
             case '?':
-                printf("result=?, optopt=%c, optarg=%s\n", optopt, optarg);
+                configMap['?'] = "Bad option!";
                 break;
             default:
                 printf("default, result=%c\n",ch);
                 break;
         }
-        printf("argv[%d]=%s\n", optind, argv[optind]);
     }
-    printf("result=-1, optind=%d\n", optind);   //看看最后optind的位置
-
-
     return 0;
-
-
-
-
 }

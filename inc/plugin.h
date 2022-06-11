@@ -13,23 +13,22 @@
  * 实际项目中随时可以替换成动态库插件形式，这里为demo代码采用直接链接编译的方式使用
  * */
 
-enum PluginType
+// 服务函数根据类型进行参数和返回值的确认
+enum PluginServiceType
 {
-    /// \brief A World plugin
-    WORLD_PLUGIN,
-    /// \brief A Model plugin
-    MODEL_PLUGIN,
-    /// \brief A Sensor plugin
-    SENSOR_PLUGIN,
-    /// \brief A System plugin
-    SYSTEM_PLUGIN,
-    /// \brief A Visual plugin
-    VISUAL_PLUGIN,
-    /// \brief A GUI plugin
-    GUI_PLUGIN
+    String  = 0x1,
+    JSON    = 0x2,
+    Binary  = 0x4,
+    Integer = 0x8,
 };
 
+enum NotifyTypes
+{
+    NetBroken = 0,
+    Quit = 1,
+};
 
+class IDlms;
 class Plugin {
 public:
     enum PluginStatus : uint8_t {
@@ -49,7 +48,7 @@ public:
      *
      * @param lpIDlms 主框架对象指针
      */
-    virtual int32_t Init(IDlms *lpIDlms) = 0;
+    virtual int32_t Init(IDlms *lpIDlms, std::string& pluginName) = 0;
 
     virtual int32_t Start() = 0;
 
@@ -60,11 +59,17 @@ public:
     // 获取插件名字
     virtual std::string GetHandleName() = 0;
 
+    virtual int32_t SendAndReceive(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) = 0;
 
+    virtual int32_t Send(PluginServiceType in, void *lpInData) = 0;
+
+    virtual int32_t Notify(PluginServiceType in, void *lpInData) = 0;
+
+    virtual bool ServiceSupport(PluginServiceType serviceType) = 0;
 
 protected:
-    volatile PluginStatus       m_pluginStatus{PLUGIN_UNKNOWN};
-    PluginType type;
+    volatile PluginStatus       pluginStatus{PLUGIN_UNKNOWN};
+    uint32_t serviceSupportList;
     std::string handleName; // name of the plugin
 };
 
