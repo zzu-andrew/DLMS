@@ -73,6 +73,13 @@ protected:
     std::string handleName; // name of the plugin
 };
 
+#ifdef __cplusplus
+extern "C" {
+const char* GetVersion();
+Plugin *CreatePlugin(const char* pluginName);
+}
+
+#endif
 
 
 
