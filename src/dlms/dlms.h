@@ -43,6 +43,11 @@ public:
 
     int32_t ParseCommandLine(int32_t argc, char* argv[]);
 
+    // 将需要工作的线程放到Push里面
+    uint32_t PushWorker(Func workFunction) override;
+    // 如果某些函数不需要再执行了就Pop掉，之后主框架就不在执行该函数了
+    int32_t PopWorker(uint32_t Index) override;
+
 
 private:
     PluginManager pluginManager;

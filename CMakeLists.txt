@@ -27,7 +27,7 @@ add_subdirectory(3rd/glog)
 add_executable(dlms
         src/dlms/dlms.cpp
         src/dlms/plugin_manager.cpp
-        utils/json_proxy.cpp)
+        )
 target_include_directories(dlms
         PUBLIC inc
         PUBLIC 3rd/nlohmann

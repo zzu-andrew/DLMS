@@ -16,11 +16,9 @@ public:
     explicit JsonProxy(json& json) : jsoObject(json) {}
     explicit JsonProxy(json&& json) : jsoObject(json) {}
 
-    JsonProxy(std::string& path, std::string& filename);
+    JsonProxy(std::string& path, std::string& filename) {}
 
-    explicit JsonProxy(std::string& filename);
-
-
+    explicit JsonProxy(std::string& filename) {}
 
 
     json& GetJsonObj() {
