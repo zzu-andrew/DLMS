@@ -21,7 +21,7 @@ public:
 
     JsonProxy(std::string& path, std::string& filename) {
         std::string file =  path + filename;
-        std::ofstream(file) << jsonObj;
+        std::ifstream(file) >> jsonObj;
     }
 
     explicit JsonProxy(std::string& filename) {}
