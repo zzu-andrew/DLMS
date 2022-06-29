@@ -7,6 +7,7 @@
 #include "dlms.h"
 #include "json.hpp"
 #include "dlms_macro.h"
+#include "dlms_error.h"
 
 using json=nlohmann::json;
 
@@ -23,6 +24,10 @@ int main(int argc, char* argv[]) {
     // 1. 解析命令行参数
     dlms.ParseCommandLine(argc, argv);
 
+    dlms.Init();
+    dlms.Start();
+    dlms.Stop();
+    dlms.Reset();
 
 
 
@@ -42,6 +47,12 @@ int main(int argc, char* argv[]) {
 
 int32_t CDlms::Init() {
 
+    // 具体的线程个数从配置文件中获取
+    lpThreadManager = new (std::nothrow) ThreadManager(10);
+    if (nullptr == lpThreadManager) {
+
+        return ERROR;
+    }
 
 
     return 0;
@@ -56,6 +67,9 @@ int32_t CDlms::Stop() {
 }
 
 int32_t CDlms::Reset() {
+
+    delete lpThreadManager;
+
     return 0;
 }
 
@@ -74,11 +88,7 @@ int32_t CDlms::ParseCommandLine(int32_t argc, char **argv) {
     return config.ParseCommandLine(argc, argv);
 }
 
-uint32_t CDlms::PushWorker(IDlms::Func workFunction) {
-    return 0;
-}
-
-int32_t CDlms::PopWorker(uint32_t Index) {
+uint32_t CDlms::Dispatch(Func workFunction) {
     return 0;
 }
 

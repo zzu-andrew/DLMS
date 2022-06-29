@@ -146,7 +146,7 @@ public:
         state_ = result;
     }
 
-    static const char *CopyState(const char *s) {
+    static const char *CopyState(const char *state) {
         uint32_t size;
         std::memcpy(&size, state, sizeof(size));
         char *result = new char[size + 5];

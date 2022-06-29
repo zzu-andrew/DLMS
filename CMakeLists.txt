@@ -19,6 +19,7 @@ message(STATUS　${CPACK_PACKAGE_VERSION})
 
 add_subdirectory(3rd/glog)
 #add_subdirectory(3rd/civetweb)
+add_subdirectory(plugins)
 
 
 

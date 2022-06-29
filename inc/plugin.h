@@ -36,7 +36,7 @@ public:
         PLUGIN_INIT                = 1,
         PLUGIN_RUNNING             = 2,
         PLUGIN_STOP                = 3,
-        PLUGIN_Reset                = 4,
+        PLUGIN_Reset               = 4,
     };
     //
 
