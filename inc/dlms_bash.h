@@ -51,9 +51,9 @@ public:
     virtual Plugin *GetPlugin(std::string &pluginName) = 0;
 
     // 将需要工作的线程放到Push里面
-    virtual uint32_t PushWork(Func workFunction) = 0;
+    virtual uint32_t PushWorker(Func workFunction) = 0;
     // 如果某些函数不需要再执行了就Pop掉，之后主框架就不在执行该函数了
-    virtual int32_t PopWork(uint32_t Index) = 0;
+    virtual int32_t PopWorker(uint32_t Index) = 0;
 };
 
 
