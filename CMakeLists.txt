@@ -14,15 +14,19 @@ set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set (CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 
+# 设置静态库文件目录
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+# 动态库文件目录
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/plugins)
+# 可执行文件目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
 message(STATUS　${CPACK_PACKAGE_VERSION})
 
 
 add_subdirectory(3rd/glog)
 #add_subdirectory(3rd/civetweb)
 add_subdirectory(plugins)
-
-
-
 
 
 add_executable(dlms
