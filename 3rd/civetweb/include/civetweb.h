@@ -452,14 +452,14 @@ CIVETWEB_API struct mg_context *mg_start(const struct mg_callbacks *callbacks,
 
    Must be called last, when an application wants to stop the web server and
    release all associated resources. This function blocks until all Civetweb
-   threads are stopped. Context pointer becomes invalid. */
+   threads are stopped. IContext pointer becomes invalid. */
 CIVETWEB_API void mg_stop(struct mg_context *);
 
 
 /* Add an additional domain to an already running web server.
  *
  * Parameters:
- *   ctx: Context handle of a server started by mg_start.
+ *   ctx: IContext handle of a server started by mg_start.
  *   options: NULL terminated list of option_name, option_value pairs that
  *            specify CivetWeb configuration parameters.
  *
@@ -1613,7 +1613,7 @@ CIVETWEB_API int mg_get_system_info(char *buffer, int buflen);
 
 /* Get context information. Useful for server diagnosis.
    Parameters:
-     ctx: Context handle
+     ctx: IContext handle
      buffer: Store context information here.
      buflen: Length of buffer (including a byte required for a terminating 0).
    Return:
@@ -1641,7 +1641,7 @@ CIVETWEB_API void mg_disable_connection_keep_alive(struct mg_connection *conn);
 #if defined(MG_EXPERIMENTAL_INTERFACES)
 /* Get connection information. Useful for server diagnosis.
    Parameters:
-     ctx: Context handle
+     ctx: IContext handle
      idx: Connection index
      buffer: Store context information here.
      buflen: Length of buffer (including a byte required for a terminating 0).

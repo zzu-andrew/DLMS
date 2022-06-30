@@ -8,6 +8,7 @@
 #include "json.hpp"
 #include "dlms_macro.h"
 #include "dlms_error.h"
+#include "thread_manager.h"
 
 using json=nlohmann::json;
 
@@ -20,7 +21,7 @@ int main(int argc, char* argv[]) {
     FLAGS_log_dir = "./log";
     LOG(INFO) << "Hello, world!";
 
-    CDlms dlms;
+    CContext dlms;
     // 1. 解析命令行参数
     dlms.ParseCommandLine(argc, argv);
 
@@ -45,35 +46,35 @@ int main(int argc, char* argv[]) {
 }
 
 
-int32_t CDlms::Init() {
+Status CContext::Init() {
 
     // 具体的线程个数从配置文件中获取
     lpThreadManager = new (std::nothrow) ThreadManager(10);
     if (nullptr == lpThreadManager) {
 
-        return ERROR;
+        return Status::OutOfMemory("");
     }
 
 
-    return 0;
+    return Status::Ok();
 }
 
-int32_t CDlms::Start() {
-    return 0;
+Status CContext::Start() {
+    return Status::Ok();
 }
 
-int32_t CDlms::Stop() {
-    return 0;
+Status CContext::Stop() {
+    return Status::Ok();
 }
 
-int32_t CDlms::Reset() {
+Status CContext::Reset() {
 
     delete lpThreadManager;
 
-    return 0;
+    return Status::Ok();
 }
 
-Plugin *CDlms::GetPlugin(std::string &pluginName) {
+Plugin *CContext::GetPlugin(std::string &pluginName) {
 
     //auto iter = m_mapPlugin.find(pluginName);
     //if (iter == m_mapPlugin.end()) {
@@ -84,12 +85,12 @@ Plugin *CDlms::GetPlugin(std::string &pluginName) {
     return nullptr;
 }
 
-int32_t CDlms::ParseCommandLine(int32_t argc, char **argv) {
+Status CContext::ParseCommandLine(int32_t argc, char **argv) {
     return config.ParseCommandLine(argc, argv);
 }
 
-uint32_t CDlms::Dispatch(Func workFunction) {
-    return 0;
+Status CContext::Dispatch(Func workFunction) {
+    return Status::InvalidArgument("");
 }
 
 #define GET_CASE_INFO(X)                                                \
@@ -97,7 +98,7 @@ uint32_t CDlms::Dispatch(Func workFunction) {
       configMap.emplace(std::make_pair(X, POINTER_SAFE(optarg)));       \
       break;
 
-int32_t CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
+Status CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
 
     int ch;
     std::string opts = "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:"
@@ -134,11 +135,11 @@ int32_t CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
             GET_CASE_INFO('z');
             case '?':
                 configMap['?'] = "Bad option!";
-                return -1;
+                return Status::InvalidArgument("");
             default:
                 printf("default, result=%c\n",ch);
                 break;
         }
     }
-    return 0;
+    return Status::Ok();
 }

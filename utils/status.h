@@ -5,6 +5,8 @@
 #ifndef DLMS_STATUS_H
 #define DLMS_STATUS_H
 #include <string>
+#include <cstring>
+#include <cassert>
 
 class Status {
 public:
@@ -22,7 +24,7 @@ public:
     Status &operator=(Status &&rhs) noexcept;
 
     // Return a success status.
-    static Status OK() { return Status(); }
+    static Status Ok() { return Status(); }
 
     // Return error status of an appropriate type.
     static Status NotFound(const std::string &msg, const std::string &msg2 = std::string()) {

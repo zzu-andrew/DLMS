@@ -20,7 +20,7 @@ class CConfig : public IConfig {
 public:
     ~CConfig() override = default;
 
-    int32_t ParseCommandLine(int32_t argc, char* argv[]);
+    Status ParseCommandLine(int32_t argc, char* argv[]);
 
 
 private:
@@ -28,24 +28,24 @@ private:
     JsonProxy* jsonProxy;
 };
 
-class CDlms : public IDlms {
+class CContext : public IContext {
 public:
-    ~CDlms() override = default;
+    ~CContext() override = default;
 
-    int32_t Init() override;
+    Status Init() override;
 
-    int32_t Start() override;
+    Status Start() override;
 
-    int32_t Stop() override;
+    Status Stop() override;
 
-    int32_t Reset() override;
+    Status Reset() override;
 
     Plugin* GetPlugin(std::string& pluginName) override;
 
-    int32_t ParseCommandLine(int32_t argc, char* argv[]);
+    Status ParseCommandLine(int32_t argc, char* argv[]);
 
     // 将需要工作的线程放到Push里面
-    uint32_t Dispatch(Func workFunction) override;
+    Status Dispatch(Func workFunction) override;
     // 如果某些函数不需要再执行了就Pop掉，之后主框架就不在执行该函数了
 
 

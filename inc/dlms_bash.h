@@ -6,43 +6,45 @@
 #define DLMS_DLMS_BASH_H
 #include <iostream>
 #include <functional>
+#include "status.h"
 #include "thread_manager.h"
 
+
 class Plugin;
-class IDlms {
+class IContext {
 public:
 
 
 public:
-    virtual ~IDlms() = default;
+    virtual ~IContext() = default;
 
     /**
      * @brief 主进程初始化
      *
      * @return 0:成功，其他：失败
      */
-    virtual int32_t Init() = 0;
+    virtual Status Init() = 0;
 
     /**
      * @brief 启动主进程
      *
      * @return 0:成功，其他：失败
      */
-    virtual int32_t Start() = 0;
+    virtual Status Start() = 0;
 
     /**
      * @brief 停止主进程
      *
      * @return 0:成功，其他：失败
      */
-    virtual int32_t Stop() = 0;
+    virtual Status Stop() = 0;
 
     /**
      * @brief 退出主进程
      *
      * @return 0:成功，其他：失败
      */
-    virtual int32_t Reset() = 0;
+    virtual Status Reset() = 0;
 
     /**
      * @brief 获取插件对象
@@ -52,7 +54,7 @@ public:
     virtual Plugin *GetPlugin(std::string &pluginName) = 0;
 
     // 将需要工作的线程放到Push里面
-    virtual uint32_t Dispatch(Func workFunction) = 0;
+    virtual Status Dispatch(Func workFunction) = 0;
 };
 
 

@@ -28,7 +28,7 @@ enum NotifyTypes
     Quit = 1,
 };
 
-class IDlms;
+class IContext;
 class Plugin {
 public:
     enum PluginStatus : uint8_t {
@@ -48,22 +48,22 @@ public:
      *
      * @param lpIDlms 主框架对象指针
      */
-    virtual int32_t Init(IDlms *lpIDlms, std::string& pluginName) = 0;
+    virtual Status Init(IContext *lpIDlms, std::string& pluginName) = 0;
 
-    virtual int32_t Start() = 0;
+    virtual Status Start() = 0;
 
-    virtual int32_t Stop() = 0;
+    virtual Status Stop() = 0;
 
-    virtual int32_t Reset() = 0;
+    virtual Status Reset() = 0;
 
     // 获取插件名字
     virtual std::string GetHandleName() = 0;
 
-    virtual int32_t SendAndReceive(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) = 0;
+    virtual Status SendAndReceive(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) = 0;
 
-    virtual int32_t Send(PluginServiceType in, void *lpInData) = 0;
+    virtual Status Send(PluginServiceType in, void *lpInData) = 0;
 
-    virtual int32_t Notify(PluginServiceType in, void *lpInData) = 0;
+    virtual Status Notify(PluginServiceType in, void *lpInData) = 0;
 
     virtual bool ServiceSupport(PluginServiceType serviceType) = 0;
 
