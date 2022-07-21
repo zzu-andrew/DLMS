@@ -4,9 +4,11 @@
 
 #ifndef DLMS_JSON_PROXY_H
 #define DLMS_JSON_PROXY_H
+
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 
 #include "json.hpp"
 #include "status.h"
@@ -15,24 +17,22 @@ using json = nlohmann::json;
 
 class JsonProxy {
 public:
-    explicit JsonProxy(json  json) : jsonObj(std::move(json)) {}
-    explicit JsonProxy(json& json) : jsonObj(json) {}
-    explicit JsonProxy(json&& json) : jsonObj(json) {}
+    explicit JsonProxy(json json) : jsonObj(std::move(json)) {}
 
-    JsonProxy(std::string& path, std::string& filename) {
-        std::string file =  path + filename;
+    explicit JsonProxy(json &json) : jsonObj(json) {}
+
+    explicit JsonProxy(json &&json) : jsonObj(json) {}
+
+    JsonProxy(std::string &path, std::string &filename) {
+        std::string file = path + "/" + filename;
         std::ifstream(file) >> jsonObj;
     }
 
-    explicit JsonProxy(std::string& filename) {}
+    explicit JsonProxy(std::string &filename) {}
 
-
-    json& GetJsonObj() {
+    json &GetJsonObj() {
         return jsonObj;
     }
-
-
-
 
 private:
     json jsonObj;

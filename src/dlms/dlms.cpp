@@ -2,6 +2,7 @@
 // Created by andrew on 2022/2/13.
 //
 #include <iostream>
+#include <csignal>
 #include <glog/logging.h>
 
 #include "dlms.h"
@@ -10,12 +11,17 @@
 #include "dlms_error.h"
 #include "thread_manager.h"
 
-using json=nlohmann::json;
+using json = nlohmann::json;
 
 using namespace std;
 
+bool running = true;
 
-int main(int argc, char* argv[]) {
+static void SignalInterrupt(int instruction) {
+    running = false;
+}
+
+int main(int argc, char *argv[]) {
 
     google::InitGoogleLogging(argv[0]);
     FLAGS_log_dir = "./log";
@@ -24,9 +30,15 @@ int main(int argc, char* argv[]) {
     CContext context;
     // 1. 解析命令行参数
     context.ParseCommandLine(argc, argv);
+    // 2. 加载配置
+    context.LoadConfig();
 
     context.Init();
     context.Start();
+
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     context.Stop();
     context.Reset();
@@ -38,7 +50,6 @@ int main(int argc, char* argv[]) {
     google::ShutdownGoogleLogging();
 
 
-
     return 0;
 }
 
@@ -46,7 +57,7 @@ int main(int argc, char* argv[]) {
 Status CContext::Init() {
 
     // 具体的线程个数从配置文件中获取
-    lpThreadManager = new (std::nothrow) ThreadManager(10);
+    lpThreadManager = new(std::nothrow) ThreadManager(10);
     if (nullptr == lpThreadManager) {
 
         return Status::OutOfMemory("");
@@ -58,6 +69,8 @@ Status CContext::Init() {
 
 Status CContext::Start() {
 
+    // 注册信号
+    signal(SIGINT, SignalInterrupt);
 
     return Status::Ok();
 }
@@ -92,6 +105,15 @@ Status CContext::Dispatch(Func workFunction) {
     return Status::InvalidArgument("");
 }
 
+Status CContext::LoadConfig() {
+    auto status = config.LoadJsonFromFile();
+    if (!status.ok()) {
+        return status;
+    }
+
+    return Status::Ok();
+}
+
 #define GET_CASE_INFO(X)                                                \
     case X:                                                             \
       configMap.emplace(std::make_pair(X, POINTER_SAFE(optarg)));       \
@@ -102,10 +124,8 @@ Status CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
     int ch;
     std::string opts = "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:"
                        "A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:R:S:T:U:V:W:X:Y:Z:";
-    while( (ch = getopt(argc, argv, opts.c_str())) != -1 )
-    {
-        switch(ch)
-        {
+    while ((ch = getopt(argc, argv, opts.c_str())) != -1) {
+        switch (ch) {
             GET_CASE_INFO('a');
             GET_CASE_INFO('b');
             GET_CASE_INFO('c');
@@ -136,9 +156,33 @@ Status CConfig::ParseCommandLine(int32_t argc, char *argv[]) {
                 configMap['?'] = "Bad option!";
                 return Status::InvalidArgument("");
             default:
-                printf("default, result=%c\n",ch);
+                printf("default, result=%c\n", ch);
                 break;
         }
     }
     return Status::Ok();
+}
+
+Status CConfig::LoadJsonFromFile() {
+
+    auto iter = configMap.find('j');
+    if (iter == std::end(configMap)) {
+        return Status::NotFound("Config json is not found");
+    }
+
+    std::string path = get_current_dir_name();
+    std::string filename = iter->second;
+
+    lpJsonProxy = new JsonProxy(path, filename);
+    if (nullptr == lpJsonProxy) {
+        return Status::OutOfMemory("Failed to create json proxy");
+    }
+
+    //std::cout << lpJsonProxy->GetJsonObj().dump() << std::endl;
+
+    return Status::Ok();
+}
+
+CConfig::~CConfig() {
+    delete lpJsonProxy;
 }

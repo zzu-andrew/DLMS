@@ -4,6 +4,7 @@
 
 #ifndef DLMS_DLMS_H
 #define DLMS_DLMS_H
+
 #include <string>
 #include <map>
 #include <unordered_map>
@@ -15,17 +16,17 @@
 #include "thread_manager.h"
 
 
-
 class CConfig : public IConfig {
 public:
-    ~CConfig() override = default;
+    ~CConfig() override;
 
-    Status ParseCommandLine(int32_t argc, char* argv[]);
+    Status ParseCommandLine(int32_t argc, char *argv[]);
 
+    Status LoadJsonFromFile();
 
 private:
     std::unordered_map<char, std::string> configMap;
-    JsonProxy* jsonProxy;
+    JsonProxy *lpJsonProxy;
 };
 
 class CContext : public IContext {
@@ -40,22 +41,24 @@ public:
 
     Status Reset() override;
 
-    Plugin* GetPlugin(std::string& pluginName) override;
-
-    Status ParseCommandLine(int32_t argc, char* argv[]);
+    Plugin *GetPlugin(std::string &pluginName) override;
 
     // 将需要工作的线程放到Push里面
     Status Dispatch(Func workFunction) override;
+
     // 如果某些函数不需要再执行了就Pop掉，之后主框架就不在执行该函数了
+    Status ParseCommandLine(int32_t argc, char *argv[]);
+
+    Status LoadConfig();
+
+public:
 
 
 private:
     PluginManager pluginManager;
-    CConfig        config;
+    CConfig config;
     ThreadManager *lpThreadManager{nullptr};
 };
-
-
 
 
 #endif //DLMS_DLMS_H

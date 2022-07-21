@@ -1,0 +1,19 @@
+{
+  "DLMS" : {
+    "Worker" : {
+      "ThreadNumber" : 10
+    }
+
+  },
+  "Plugins" : {
+    "Websocket" : {
+      "Client" : {
+
+      },
+      "Server" : {
+
+      }
+    }
+
+  }
+}

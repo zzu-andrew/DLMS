@@ -43,6 +43,9 @@ target_link_directories(dlms
 target_link_libraries(dlms
         PUBLIC glog)
 
+# 编译依赖，如果添加依赖编译时会将对应的目标也进行编译
+add_dependencies(dlms websocket)
+
 add_subdirectory(test)
 
 

@@ -60,7 +60,7 @@ private:
         while (Running == threadStatus) {
             cv.wait(lock, [&]{return (!queueFunc.empty() || Quit());});
             if (!Quit() && !queueFunc.empty()) {
-                auto op = std::move(queueFunc.front());
+                auto &op = queueFunc.front();
                 queueFunc.pop();
                 lock.unlock();
                 op();
