@@ -50,7 +50,7 @@ class WebSocketHandler : public CivetWebSocketHandler {
 class WebsocketServer {
 public:
 
-    int32_t Init(IContext *lpIDlms, std::string& pluginName);
+    int32_t Init(IContext *lpContext, std::string& pluginName);
 
     Status Start();
 

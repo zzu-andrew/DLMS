@@ -21,18 +21,15 @@ int main(int argc, char* argv[]) {
     FLAGS_log_dir = "./log";
     LOG(INFO) << "Hello, world!";
 
-    CContext dlms;
+    CContext context;
     // 1. 解析命令行参数
-    dlms.ParseCommandLine(argc, argv);
+    context.ParseCommandLine(argc, argv);
 
-    dlms.Init();
-    dlms.Start();
-    dlms.Stop();
-    dlms.Reset();
+    context.Init();
+    context.Start();
 
-
-
-
+    context.Stop();
+    context.Reset();
 
 
 
@@ -60,6 +57,8 @@ Status CContext::Init() {
 }
 
 Status CContext::Start() {
+
+
     return Status::Ok();
 }
 

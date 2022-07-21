@@ -58,5 +58,4 @@ private:
 
 
 
-
 #endif //DLMS_DLMS_H

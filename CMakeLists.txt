@@ -43,7 +43,7 @@ target_link_directories(dlms
 target_link_libraries(dlms
         PUBLIC glog)
 
-
+add_subdirectory(test)
 
 
 

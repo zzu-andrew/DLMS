@@ -764,72 +764,73 @@ if (BUILD_TESTING)
     endif (APPLE)
   endif (WITH_CUSTOM_PREFIX)
 
-  add_executable (stl_logging_unittest
-          src/stl_logging_unittest.cc
-          )
-
-  target_link_libraries (stl_logging_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-  if (HAVE_NO_DEPRECATED)
-    set_property (TARGET stl_logging_unittest APPEND PROPERTY COMPILE_OPTIONS
-            -Wno-deprecated)
-  endif (HAVE_NO_DEPRECATED)
-
-  if (HAVE_UNORDERED_MAP AND HAVE_UNORDERED_SET)
-    target_compile_definitions (stl_logging_unittest PRIVATE
-            GLOG_STL_LOGGING_FOR_UNORDERED)
-  endif (HAVE_UNORDERED_MAP AND HAVE_UNORDERED_SET)
-
-  if (HAVE_TR1_UNORDERED_MAP AND HAVE_TR1_UNORDERED_SET)
-    target_compile_definitions (stl_logging_unittest PRIVATE
-            GLOG_STL_LOGGING_FOR_TR1_UNORDERED)
-  endif (HAVE_TR1_UNORDERED_MAP AND HAVE_TR1_UNORDERED_SET)
-
-  if (HAVE_EXT_HASH_MAP AND HAVE_EXT_HASH_SET)
-    target_compile_definitions (stl_logging_unittest PRIVATE
-            GLOG_STL_LOGGING_FOR_EXT_HASH)
-  endif (HAVE_EXT_HASH_MAP AND HAVE_EXT_HASH_SET)
-
-  if (HAVE_EXT_SLIST)
-    target_compile_definitions (stl_logging_unittest PRIVATE
-            GLOG_STL_LOGGING_FOR_EXT_SLIST)
-  endif (HAVE_EXT_SLIST)
-
-  if (HAVE_SYMBOLIZE)
-    add_executable (symbolize_unittest
-            src/symbolize_unittest.cc
-            )
-
-    target_link_libraries (symbolize_unittest PRIVATE ${_GLOG_TEST_LIBS})
-  endif (HAVE_SYMBOLIZE)
-
-  add_executable (demangle_unittest
-          src/demangle_unittest.cc
-          )
-
-  target_link_libraries (demangle_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-  if (HAVE_STACKTRACE)
-    add_executable (stacktrace_unittest
-            src/stacktrace_unittest.cc
-            )
-
-    target_link_libraries (stacktrace_unittest PRIVATE ${_GLOG_TEST_LIBS})
-  endif (HAVE_STACKTRACE)
-
-  add_executable (utilities_unittest
-          src/utilities_unittest.cc
-          )
-
-  target_link_libraries (utilities_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-  if (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
-    add_executable (signalhandler_unittest
-            src/signalhandler_unittest.cc
-            )
-
-    target_link_libraries (signalhandler_unittest PRIVATE ${_GLOG_TEST_LIBS})
-  endif (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
+#
+#  add_executable (stl_logging_unittest
+#          src/stl_logging_unittest.cc
+#          )
+#
+#  target_link_libraries (stl_logging_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#  if (HAVE_NO_DEPRECATED)
+#    set_property (TARGET stl_logging_unittest APPEND PROPERTY COMPILE_OPTIONS
+#            -Wno-deprecated)
+#  endif (HAVE_NO_DEPRECATED)
+#
+#  if (HAVE_UNORDERED_MAP AND HAVE_UNORDERED_SET)
+#    target_compile_definitions (stl_logging_unittest PRIVATE
+#            GLOG_STL_LOGGING_FOR_UNORDERED)
+#  endif (HAVE_UNORDERED_MAP AND HAVE_UNORDERED_SET)
+#
+#  if (HAVE_TR1_UNORDERED_MAP AND HAVE_TR1_UNORDERED_SET)
+#    target_compile_definitions (stl_logging_unittest PRIVATE
+#            GLOG_STL_LOGGING_FOR_TR1_UNORDERED)
+#  endif (HAVE_TR1_UNORDERED_MAP AND HAVE_TR1_UNORDERED_SET)
+#
+#  if (HAVE_EXT_HASH_MAP AND HAVE_EXT_HASH_SET)
+#    target_compile_definitions (stl_logging_unittest PRIVATE
+#            GLOG_STL_LOGGING_FOR_EXT_HASH)
+#  endif (HAVE_EXT_HASH_MAP AND HAVE_EXT_HASH_SET)
+#
+#  if (HAVE_EXT_SLIST)
+#    target_compile_definitions (stl_logging_unittest PRIVATE
+#            GLOG_STL_LOGGING_FOR_EXT_SLIST)
+#  endif (HAVE_EXT_SLIST)
+#
+#  if (HAVE_SYMBOLIZE)
+#    add_executable (symbolize_unittest
+#            src/symbolize_unittest.cc
+#            )
+#
+#    target_link_libraries (symbolize_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#  endif (HAVE_SYMBOLIZE)
+#
+#  add_executable (demangle_unittest
+#          src/demangle_unittest.cc
+#          )
+#
+#  target_link_libraries (demangle_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#  if (HAVE_STACKTRACE)
+#    add_executable (stacktrace_unittest
+#            src/stacktrace_unittest.cc
+#            )
+#
+#    target_link_libraries (stacktrace_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#  endif (HAVE_STACKTRACE)
+#
+#  add_executable (utilities_unittest
+#          src/utilities_unittest.cc
+#          )
+#
+#  target_link_libraries (utilities_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#  if (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
+#    add_executable (signalhandler_unittest
+#            src/signalhandler_unittest.cc
+#            )
+#
+#    target_link_libraries (signalhandler_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#  endif (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
 
   add_test (NAME demangle COMMAND demangle_unittest)
   add_test (NAME logging COMMAND logging_unittest)
@@ -861,16 +862,16 @@ if (BUILD_TESTING)
     add_test (NAME symbolize COMMAND symbolize_unittest)
   endif (TARGET symbolize_unittest)
 
-  if (HAVE_LIB_GMOCK)
-    add_executable (mock-log_unittest
-            src/mock-log_unittest.cc
-            src/mock-log.h
-            )
-
-    target_link_libraries (mock-log_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-    add_test (NAME mock-log COMMAND mock-log_unittest)
-  endif (HAVE_LIB_GMOCK)
+#  if (HAVE_LIB_GMOCK)
+#    add_executable (mock-log_unittest
+#            src/mock-log_unittest.cc
+#            src/mock-log.h
+#            )
+#
+#    target_link_libraries (mock-log_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#    add_test (NAME mock-log COMMAND mock-log_unittest)
+#  endif (HAVE_LIB_GMOCK)
 
   # Generate an initial cache
 
@@ -926,20 +927,20 @@ if (BUILD_TESTING)
   set_tests_properties (cmake_package_config_build PROPERTIES
           FIXTURES_REQUIRED "cmake_package_config;cmake_package_config_working")
 
-  add_executable (cleanup_immediately_unittest
-          src/cleanup_immediately_unittest.cc)
+#  add_executable (cleanup_immediately_unittest
+#          src/cleanup_immediately_unittest.cc)
+#
+#  target_link_libraries (cleanup_immediately_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#  add_executable (cleanup_with_absolute_prefix_unittest
+#          src/cleanup_with_absolute_prefix_unittest.cc)
+#
+#  target_link_libraries (cleanup_with_absolute_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#
+#  add_executable (cleanup_with_relative_prefix_unittest
+#          src/cleanup_with_relative_prefix_unittest.cc)
 
-  target_link_libraries (cleanup_immediately_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-  add_executable (cleanup_with_absolute_prefix_unittest
-          src/cleanup_with_absolute_prefix_unittest.cc)
-
-  target_link_libraries (cleanup_with_absolute_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
-
-  add_executable (cleanup_with_relative_prefix_unittest
-          src/cleanup_with_relative_prefix_unittest.cc)
-
-  target_link_libraries (cleanup_with_relative_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
+#  target_link_libraries (cleanup_with_relative_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   set (CLEANUP_LOG_DIR ${CMAKE_CURRENT_BINARY_DIR}/cleanup_tests)
 
@@ -947,35 +948,35 @@ if (BUILD_TESTING)
           ${CMAKE_COMMAND} -E make_directory ${CLEANUP_LOG_DIR})
   add_test (NAME cleanup_logdir COMMAND
           ${CMAKE_COMMAND} -E remove_directory ${CLEANUP_LOG_DIR})
-  add_test (NAME cleanup_immediately COMMAND
-          ${CMAKE_COMMAND}
-          -DLOGCLEANUP=$<TARGET_FILE:cleanup_immediately_unittest>
-          # NOTE The trailing slash is important
-          -DTEST_DIR=${CLEANUP_LOG_DIR}/
-          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest1.cmake
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  add_test (NAME cleanup_with_absolute_prefix COMMAND
-          ${CMAKE_COMMAND}
-          -DLOGCLEANUP=$<TARGET_FILE:cleanup_with_absolute_prefix_unittest>
-          -DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/
-          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest2.cmake
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  add_test (NAME cleanup_with_relative_prefix COMMAND
-          ${CMAKE_COMMAND}
-          -DLOGCLEANUP=$<TARGET_FILE:cleanup_with_relative_prefix_unittest>
-          -DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/
-          -DTEST_SUBDIR=test_subdir/
-          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest3.cmake
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+#  add_test (NAME cleanup_immediately COMMAND
+#          ${CMAKE_COMMAND}
+#          -DLOGCLEANUP=$<TARGET_FILE:cleanup_immediately_unittest>
+#          # NOTE The trailing slash is important
+#          -DTEST_DIR=${CLEANUP_LOG_DIR}/
+#          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest1.cmake
+#          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+#  add_test (NAME cleanup_with_absolute_prefix COMMAND
+#          ${CMAKE_COMMAND}
+#          -DLOGCLEANUP=$<TARGET_FILE:cleanup_with_absolute_prefix_unittest>
+#          -DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/
+#          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest2.cmake
+#          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+#  add_test (NAME cleanup_with_relative_prefix COMMAND
+#          ${CMAKE_COMMAND}
+#          -DLOGCLEANUP=$<TARGET_FILE:cleanup_with_relative_prefix_unittest>
+#          -DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/
+#          -DTEST_SUBDIR=test_subdir/
+#          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunCleanerTest3.cmake
+#          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
   # Fixtures setup
   set_tests_properties (cleanup_init PROPERTIES FIXTURES_SETUP logcleanuptest)
   ## Fixtures cleanup
   set_tests_properties (cleanup_logdir PROPERTIES FIXTURES_CLEANUP logcleanuptest)
   # Fixture requirements
-  set_tests_properties (cleanup_immediately PROPERTIES FIXTURES_REQUIRED logcleanuptest)
-  set_tests_properties (cleanup_with_absolute_prefix PROPERTIES FIXTURES_REQUIRED logcleanuptest)
-  set_tests_properties (cleanup_with_relative_prefix PROPERTIES FIXTURES_REQUIRED logcleanuptest)
+#  set_tests_properties (cleanup_immediately PROPERTIES FIXTURES_REQUIRED logcleanuptest)
+#  set_tests_properties (cleanup_with_absolute_prefix PROPERTIES FIXTURES_REQUIRED logcleanuptest)
+#  set_tests_properties (cleanup_with_relative_prefix PROPERTIES FIXTURES_REQUIRED logcleanuptest)
 endif (BUILD_TESTING)
 
 install (TARGETS glog

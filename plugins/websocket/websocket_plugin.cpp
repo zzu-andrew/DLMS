@@ -15,7 +15,6 @@ Status Websocket::Init(IContext *lpIDlms, std::string &pluginName) {
     mg_init_library(0);
 
 
-
     return Status::Ok();
 }
 
