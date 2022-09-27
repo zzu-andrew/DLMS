@@ -32,7 +32,7 @@ public:
     void Start(uint32_t threadNumber) {
         threadStatus = Running;
         for (uint32_t i = 0; i < threadNumber; i++) {
-            this->threadPool.emplace_back(&ThreadManager::Run, this);
+            this->threadPool.emplace_back(new std::thread(&ThreadManager::Run, this, i));
         }
     }
 
@@ -42,19 +42,21 @@ public:
         lock.unlock();
         cv.notify_one();
     }
-
+    // 在所有插件停止结束之后这里才能停止
     void Stop() {
         std::unique_lock<std::mutex> lock(mux);
         threadStatus = Stopping;
         lock.unlock();
         cv.notify_all();
         for (auto& dispatchThread : threadPool) {
-            dispatchThread.join();
+            dispatchThread->join();
         }
     }
 
 private:
-    void Run() {
+    void Run(int32_t index) {
+        std::string threadName = std::string("Worker-") + std::to_string(index);
+        pthread_setname_np(threadPool[index]->native_handle(),threadName.c_str());
 
         std::unique_lock<std::mutex> lock(mux);
         while (Running == threadStatus) {
@@ -73,7 +75,7 @@ private:
     }
 
 private:
-    std::vector<std::thread> threadPool{}; // 线程池
+    std::vector<std::shared_ptr<std::thread>> threadPool{}; // 线程池
     ThreadStatus threadStatus{Initializing}; //
     std::mutex mux;
     std::queue<Func> queueFunc;

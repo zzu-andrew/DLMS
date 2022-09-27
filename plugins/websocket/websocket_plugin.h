@@ -9,15 +9,12 @@
 #include <unistd.h>
 #include "CivetServer.h"
 #include "plugin.h"
-#include "websocket_server.h"
-#include "websocket_client.h"
-
 
 class Websocket : public Plugin {
 public:
     ~Websocket() override;
 
-    Status Init(IContext *lpIDlms, std::string& pluginName) override;
+    Status Init(IContext *lpContext, std::string pluginName) override;
 
     Status Start() override;
 
@@ -25,20 +22,19 @@ public:
 
     Status Reset() override;
 
+    std::string GetName() override;
 
-    std::string GetHandleName() override;
+    Status SendSync(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) override;
 
-    Status SendAndReceive(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) override;
-
-    Status Send(PluginServiceType in, void *lpInData) override;
+    Status SendAsync(PluginServiceType in, void *lpInData) override;
 
     Status Notify(PluginServiceType in, void *lpInData) override;
 
-    bool ServiceSupport(PluginServiceType serviceType) override;
+    bool Support(PluginServiceType serviceType) override;
 
-private:
-    WebsocketServer websocketServer;
-
+    Status PostMessage(PluginServiceType in, void *lpInData) override;
+protected:
+    IContext *lpContext{nullptr};
 };
 
 

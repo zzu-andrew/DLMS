@@ -7,6 +7,7 @@
 
 #include "dlms.h"
 #include "json.hpp"
+#include "status.h"
 #include "dlms_macro.h"
 #include "dlms_error.h"
 #include "thread_manager.h"
@@ -15,9 +16,12 @@ using json = nlohmann::json;
 
 using namespace std;
 
-bool running = true;
+static bool running = true;
 
-static void SignalInterrupt(int instruction) {
+static void SignalInterrupt(int sig) {
+    printf("WrkProcess .I get signal.%d threadid:%lu/n",sig, pthread_self());
+
+
     running = false;
 }
 
@@ -27,40 +31,95 @@ int main(int argc, char *argv[]) {
     FLAGS_log_dir = "./log";
     LOG(INFO) << "Hello, world!";
 
+    struct sigaction action{};
+
+    /* 设置信号忽略 */
+    sigemptyset(&action.sa_mask);
+    //sigaddset(&action.sa_mask, SIGINT);
+
+    action.sa_handler = SignalInterrupt; //这个地方也可以是函数
+
+    action.sa_flags = SA_SIGINFO;
+
+    sigaction(SIGINT, &action, nullptr);
+
     CContext context;
     // 1. 解析命令行参数
-    context.ParseCommandLine(argc, argv);
+    auto status = context.ParseCommandLine(argc, argv);
+    if (!status.ok()) {
+        goto out;
+    }
+
     // 2. 加载配置
-    context.LoadConfig();
+    status = context.LoadConfig();
+    if (!status.ok()) {
+        //goto out;
+    }
+
+    // 3. 加载插件
+    status = context.LoadPlugins();
+    if (!status.ok()) {
+        goto out;
+    }
 
     context.Init();
+    if (!status.ok()) {
+        goto out;
+    }
+
     context.Start();
+    if (!status.ok()) {
+        goto out;
+    }
 
     while (running) {
+        printf("running = %d",  running);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     context.Stop();
+    if (!status.ok()) {
+        goto out;
+    }
+
     context.Reset();
+    if (!status.ok()) {
+        goto out;
+    }
 
-
-
-    //...... DoSomething
-    //Shutdown google's logging library.
     google::ShutdownGoogleLogging();
 
-
     return 0;
+out:
+    LOG(INFO) << status.ToString();
+    return -1;
 }
 
 
 Status CContext::Init() {
 
     // 具体的线程个数从配置文件中获取
+    //auto json = config.GetJsonProxy().GetJsonObj();
+    //auto number = json["DLMS"]["Worker"]["ThreadNumber"];
+    //if (!number.is_number()) {
+    //    return Status::NotFound("ThreadNumber is is not exists");
+    //}
+    // 创建工作线程池
     lpThreadManager = new(std::nothrow) ThreadManager(10);
     if (nullptr == lpThreadManager) {
 
         return Status::OutOfMemory("");
+    }
+
+
+    for (auto &plugins : pluginManager.GetPluginsMap()) {
+
+        for (auto & plugin : plugins.second) {
+            auto status = plugin.second->Init(this, plugins.first);
+            if (!status.ok()) {
+                return status;
+            }
+        }
     }
 
 
@@ -70,12 +129,24 @@ Status CContext::Init() {
 Status CContext::Start() {
 
     // 注册信号
-    signal(SIGINT, SignalInterrupt);
+
+    for (auto &plugins : pluginManager.GetPluginsMap()) {
+
+        for (auto & plugin : plugins.second) {
+            auto status = plugin.second->Start();
+            if (!status.ok()) {
+                return status;
+            }
+        }
+    }
+
 
     return Status::Ok();
 }
 
 Status CContext::Stop() {
+
+    lpThreadManager->Stop();
     return Status::Ok();
 }
 
@@ -86,7 +157,7 @@ Status CContext::Reset() {
     return Status::Ok();
 }
 
-Plugin *CContext::GetPlugin(std::string &pluginName) {
+Plugin *CContext::GetPlugin(std::string &pluginName, std::string &type) {
 
     //auto iter = m_mapPlugin.find(pluginName);
     //if (iter == m_mapPlugin.end()) {
@@ -102,6 +173,9 @@ Status CContext::ParseCommandLine(int32_t argc, char **argv) {
 }
 
 Status CContext::Dispatch(Func workFunction) {
+
+
+    lpThreadManager->Dispatch(workFunction);
     return Status::InvalidArgument("");
 }
 
@@ -112,6 +186,9 @@ Status CContext::LoadConfig() {
     }
 
     return Status::Ok();
+}
+Status CContext::LoadPlugins() {
+    return pluginManager.LoadPlugin();
 }
 
 #define GET_CASE_INFO(X)                                                \
@@ -178,11 +255,15 @@ Status CConfig::LoadJsonFromFile() {
         return Status::OutOfMemory("Failed to create json proxy");
     }
 
-    //std::cout << lpJsonProxy->GetJsonObj().dump() << std::endl;
+    std::cout << lpJsonProxy->GetJsonObj().dump() << std::endl;
 
     return Status::Ok();
 }
 
 CConfig::~CConfig() {
     delete lpJsonProxy;
+}
+
+JsonProxy &CConfig::GetJsonProxy() {
+    return *lpJsonProxy;
 }

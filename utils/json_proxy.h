@@ -17,6 +17,8 @@ using json = nlohmann::json;
 
 class JsonProxy {
 public:
+    JsonProxy() = default;
+
     explicit JsonProxy(json json) : jsonObj(std::move(json)) {}
 
     explicit JsonProxy(json &json) : jsonObj(json) {}
@@ -25,7 +27,8 @@ public:
 
     JsonProxy(std::string &path, std::string &filename) {
         std::string file = path + "/" + filename;
-        std::ifstream(file) >> jsonObj;
+        std::ifstream f(file.c_str());
+        jsonObj = json::parse(f);
     }
 
     explicit JsonProxy(std::string &filename) {}

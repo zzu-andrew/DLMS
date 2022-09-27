@@ -24,9 +24,11 @@ public:
 
     Status LoadJsonFromFile();
 
+    JsonProxy& GetJsonProxy();
+
 private:
     std::unordered_map<char, std::string> configMap;
-    JsonProxy *lpJsonProxy;
+    JsonProxy *lpJsonProxy{nullptr};
 };
 
 class CContext : public IContext {
@@ -41,7 +43,7 @@ public:
 
     Status Reset() override;
 
-    Plugin *GetPlugin(std::string &pluginName) override;
+    Plugin *GetPlugin(std::string &pluginName, std::string &type) override;
 
     // 将需要工作的线程放到Push里面
     Status Dispatch(Func workFunction) override;
@@ -50,6 +52,8 @@ public:
     Status ParseCommandLine(int32_t argc, char *argv[]);
 
     Status LoadConfig();
+
+    Status LoadPlugins();
 
 public:
 

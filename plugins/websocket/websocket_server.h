@@ -11,28 +11,32 @@
 #include "plugin.h"
 #include "dlms_error.h"
 #include "status.h"
+#include "websocket_plugin.h"
 
+
+
+#ifdef USE_WEBSOCKET
 class WebSocketHandler : public CivetWebSocketHandler {
 
-    bool handleConnection(CivetServer *server,
-                                  const struct mg_connection *conn) override {
+    virtual bool handleConnection(CivetServer *server,
+                                  const struct mg_connection *conn) {
         printf("WS connected\n");
         return true;
     }
 
-    void handleReadyState(CivetServer *server,
-                                  struct mg_connection *conn) override {
+    virtual void handleReadyState(CivetServer *server,
+                                  struct mg_connection *conn) {
         printf("WS ready\n");
 
         const char *text = "Hello from the websocket ready handler";
         mg_websocket_write(conn, MG_WEBSOCKET_OPCODE_TEXT, text, strlen(text));
     }
 
-    bool handleData(CivetServer *server,
+    virtual bool handleData(CivetServer *server,
                             struct mg_connection *conn,
                             int bits,
                             char *data,
-                            size_t data_len) override {
+                            size_t data_len) {
         printf("WS got %lu bytes: ", (long unsigned)data_len);
         fwrite(data, 1, data_len, stdout);
         printf("\n");
@@ -41,18 +45,24 @@ class WebSocketHandler : public CivetWebSocketHandler {
         return (data_len<4);
     }
 
-    void handleClose(CivetServer *server,
-                             const struct mg_connection *conn) override {
+    virtual void handleClose(CivetServer *server,
+                             const struct mg_connection *conn) {
         printf("WS closed\n");
     }
 };
+#endif
 
-class WebsocketServer {
+
+class WebsocketServer : public Websocket {
 public:
 
-    int32_t Init(IContext *lpContext, std::string& pluginName);
+    Status Init(IContext *lpContext, std::string pluginName) override;
 
-    Status Start();
+    Status Start() override;
+
+    Status Stop() override;
+
+    Status Reset() override;
 
 
 private:

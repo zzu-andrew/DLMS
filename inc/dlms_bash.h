@@ -51,7 +51,7 @@ public:
      *
      * @return nullptr:失败，其他：成功
      */
-    virtual Plugin *GetPlugin(std::string &pluginName) = 0;
+    virtual Plugin *GetPlugin(std::string &pluginName, std::string &type) = 0;
 
     // 将需要工作的线程放到Push里面
     virtual Status Dispatch(Func workFunction) = 0;

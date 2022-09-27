@@ -1,24 +1,8 @@
-/* Copyright (c) 2013-2021 the Civetweb developers
- * Copyright (c) 2004-2013 Sergey Lyubka
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
+
+#include <sys/epoll.h>
+
+
+
 
 #if defined(__GNUC__) || defined(__MINGW32__)
 #define GCC_VERSION                                                            \
@@ -1515,29 +1499,8 @@ static void mg_snprintf(const struct mg_connection *conn,
 
 /* This following lines are just meant as a reminder to use the mg-functions
  * for memory management */
-#if defined(malloc)
-#undef malloc
-#endif
-#if defined(calloc)
-#undef calloc
-#endif
-#if defined(realloc)
-#undef realloc
-#endif
-#if defined(free)
-#undef free
-#endif
-#if defined(snprintf)
-#undef snprintf
-#endif
-#if defined(vsnprintf)
-#undef vsnprintf
-#endif
-#define malloc DO_NOT_USE_THIS_FUNCTION__USE_mg_malloc
-#define calloc DO_NOT_USE_THIS_FUNCTION__USE_mg_calloc
-#define realloc DO_NOT_USE_THIS_FUNCTION__USE_mg_realloc
-#define free DO_NOT_USE_THIS_FUNCTION__USE_mg_free
-#define snprintf DO_NOT_USE_THIS_FUNCTION__USE_mg_snprintf
+
+
 #if defined(_WIN32)
 /* vsnprintf must not be used in any system,
  * but this define only works well for Windows. */
@@ -5701,16 +5664,6 @@ mg_start_thread_with_id(mg_thread_func_t func,
 	int result;
 
 	(void)pthread_attr_init(&attr);
-
-#if defined(__ZEPHYR__)
-	pthread_attr_setstack(&attr,
-	                      &civetweb_worker_stacks[zephyr_worker_stack_index++],
-	                      ZEPHYR_STACK_SIZE);
-#elif defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size,
-	 * e.g. -DUSE_STACK_SIZE=16384 */
-	(void)pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
-#endif /* defined(USE_STACK_SIZE) && USE_STACK_SIZE > 1 */
 
 	result = pthread_create(&thread_id, &attr, func, param);
 	pthread_attr_destroy(&attr);
@@ -19145,6 +19098,25 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 	}
 }
 
+int
+socket_closeonexec(int fd)
+{
+#if !defined(_WIN32) && defined(EVENT__HAVE_SETFD)
+    int flags;
+	if ((flags = fcntl(fd, F_GETFD, NULL)) < 0) {
+		event_warn("fcntl(%d, F_GETFD)", fd);
+		return -1;
+	}
+	if (!(flags & FD_CLOEXEC)) {
+		if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
+			event_warn("fcntl(%d, F_SETFD)", fd);
+			return -1;
+		}
+	}
+#endif
+    return 0;
+}
+
 
 static void
 master_thread_run(struct mg_context *ctx)
@@ -19154,31 +19126,14 @@ master_thread_run(struct mg_context *ctx)
 	unsigned int i;
 	unsigned int workerthreadcount;
 
+
+
 	if (!ctx) {
 		return;
 	}
 
 	mg_set_thread_name("master");
 
-	/* Increase priority of the master thread */
-#if defined(_WIN32)
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-#elif defined(USE_MASTER_THREAD_PRIORITY)
-	int min_prio = sched_get_priority_min(SCHED_RR);
-	int max_prio = sched_get_priority_max(SCHED_RR);
-	if ((min_prio >= 0) && (max_prio >= 0)
-	    && ((USE_MASTER_THREAD_PRIORITY) <= max_prio)
-	    && ((USE_MASTER_THREAD_PRIORITY) >= min_prio)) {
-		struct sched_param sched_param = {0};
-		sched_param.sched_priority = (USE_MASTER_THREAD_PRIORITY);
-		pthread_setschedparam(pthread_self(), SCHED_RR, &sched_param);
-	}
-#endif
-
-	/* Initialize thread local storage */
-#if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
-#endif
 	tls.is_master = 1;
 	pthread_setspecific(sTlsKey, &tls);
 
@@ -19189,41 +19144,68 @@ master_thread_run(struct mg_context *ctx)
 		tls.user_ptr = NULL;
 	}
 
-	/* Lua background script "start" event */
-#if defined(USE_LUA)
-	if (ctx->lua_background_state) {
-		lua_State *lstate = (lua_State *)ctx->lua_background_state;
-		pthread_mutex_lock(&ctx->lua_bg_mutex);
-
-		/* call "start()" in Lua */
-		lua_getglobal(lstate, "start");
-		if (lua_type(lstate, -1) == LUA_TFUNCTION) {
-			int ret = lua_pcall(lstate, /* args */ 0, /* results */ 0, 0);
-			if (ret != 0) {
-				struct mg_connection fc;
-				lua_cry(fake_connection(&fc, ctx),
-				        ret,
-				        lstate,
-				        "lua_background_script",
-				        "start");
-			}
-		} else {
-			lua_pop(lstate, 1);
-		}
-
-		/* determine if there is a "log()" function in Lua background script */
-		lua_getglobal(lstate, "log");
-		if (lua_type(lstate, -1) == LUA_TFUNCTION) {
-			ctx->lua_bg_log_available = 1;
-		}
-		lua_pop(lstate, 1);
-
-		pthread_mutex_unlock(&ctx->lua_bg_mutex);
-	}
-#endif
-
 	/* Server starts *now* */
 	ctx->start_time = time(NULL);
+
+    int epfd = -1;
+    struct epoll_event *events;
+
+#ifdef EVENT__HAVE_EPOLL_CREATE1
+    /* First, try the shiny new epoll_create1 interface, if we have it. */
+	epfd = epoll_create1(EPOLL_CLOEXEC);
+#endif
+    if (epfd == -1) {
+        /* Initialize the kernel queue using the old interface.  (The
+        size field is ignored   since 2.6.8.) */
+        if ((epfd = epoll_create(32000)) == -1) {
+            if (errno != ENOSYS)
+                DEBUG_TRACE("%s", "epoll_create");
+            return ;
+        }
+        socket_closeonexec(epfd);
+    }
+
+    /* Initialize fields */
+    events = static_cast<epoll_event *>(malloc(sizeof(struct epoll_event) * 1024));
+    if (events == nullptr) {
+        close(epfd);
+        return;
+    }
+
+    for (i = 0; i < ctx->num_listening_sockets; i++) {
+        struct epoll_event epev{};
+        memset(&epev, 0, sizeof(epev));
+        epev.data.fd = ctx->listening_sockets[i].sock;
+        epev.events = EPOLLIN;
+        if (epoll_ctl(epfd, EPOLL_CTL_ADD, epev.data.fd, &epev) < 0) {
+            close(epev.data.fd);
+            return;
+        }
+    }
+    //
+    ///* Server accept loop */
+    //while (STOP_FLAG_IS_ZERO(&ctx->stop_flag)) {
+    //
+    //
+    //    if (mg_poll(pfd,
+    //                ctx->num_listening_sockets,
+    //                SOCKET_TIMEOUT_QUANTUM,
+    //                &(ctx->stop_flag))
+    //        > 0) {
+    //        for (i = 0; i < ctx->num_listening_sockets; i++) {
+    //            /* NOTE(lsm): on QNX, poll() returns POLLRDNORM after the
+    //             * successful poll, and POLLIN is defined as
+    //             * (POLLRDNORM | POLLRDBAND)
+    //             * Therefore, we're checking pfd[i].revents & POLLIN, not
+    //             * pfd[i].revents == POLLIN. */
+    //            if (STOP_FLAG_IS_ZERO(&ctx->stop_flag)
+    //                && (pfd[i].revents & POLLIN)) {
+    //                accept_new_connection(&ctx->listening_sockets[i], ctx);
+    //            }
+    //        }
+    //    }
+    //}
+
 
 	/* Server accept loop */
 	pfd = ctx->listening_socket_fds;
@@ -20077,99 +20059,6 @@ mg_start2(struct mg_init_data *init, struct mg_error_data *error)
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
 	}
-
-#if defined(ALTERNATIVE_QUEUE)
-	ctx->client_wait_events =
-	    (void **)mg_calloc_ctx(ctx->cfg_worker_threads,
-	                           sizeof(ctx->client_wait_events[0]),
-	                           ctx);
-	if (ctx->client_wait_events == NULL) {
-		const char *err_msg = "Not enough memory for worker event array";
-		mg_cry_ctx_internal(ctx, "%s", err_msg);
-		mg_free(ctx->worker_threadids);
-
-		if ((error != NULL) && (error->text_buffer_size > 0)) {
-			mg_snprintf(NULL,
-			            NULL, /* No truncation check for error buffers */
-			            error->text,
-			            error->text_buffer_size,
-			            "%s",
-			            err_msg);
-		}
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-
-	ctx->client_socks =
-	    (struct socket *)mg_calloc_ctx(ctx->cfg_worker_threads,
-	                                   sizeof(ctx->client_socks[0]),
-	                                   ctx);
-	if (ctx->client_socks == NULL) {
-		const char *err_msg = "Not enough memory for worker socket array";
-		mg_cry_ctx_internal(ctx, "%s", err_msg);
-		mg_free(ctx->client_wait_events);
-		mg_free(ctx->worker_threadids);
-
-		if ((error != NULL) && (error->text_buffer_size > 0)) {
-			mg_snprintf(NULL,
-			            NULL, /* No truncation check for error buffers */
-			            error->text,
-			            error->text_buffer_size,
-			            "%s",
-			            err_msg);
-		}
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-
-	for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
-		ctx->client_wait_events[i] = event_create();
-		if (ctx->client_wait_events[i] == 0) {
-			const char *err_msg = "Error creating worker event %i";
-			mg_cry_ctx_internal(ctx, err_msg, i);
-			while (i > 0) {
-				i--;
-				event_destroy(ctx->client_wait_events[i]);
-			}
-			mg_free(ctx->client_socks);
-			mg_free(ctx->client_wait_events);
-			mg_free(ctx->worker_threadids);
-
-			if ((error != NULL) && (error->text_buffer_size > 0)) {
-				mg_snprintf(NULL,
-				            NULL, /* No truncation check for error buffers */
-				            error->text,
-				            error->text_buffer_size,
-				            err_msg,
-				            i);
-			}
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		}
-	}
-#endif
-
-#if defined(USE_TIMERS)
-	if (timers_init(ctx) != 0) {
-		const char *err_msg = "Error creating timers";
-		mg_cry_ctx_internal(ctx, "%s", err_msg);
-
-		if ((error != NULL) && (error->text_buffer_size > 0)) {
-			mg_snprintf(NULL,
-			            NULL, /* No truncation check for error buffers */
-			            error->text,
-			            error->text_buffer_size,
-			            "%s",
-			            err_msg);
-		}
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-#endif
 
 	/* Context has been created - init user libraries */
 	if (ctx->callbacks.init_context) {

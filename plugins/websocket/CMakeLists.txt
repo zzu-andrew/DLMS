@@ -1,8 +1,15 @@
 # 定义动态库，虽然最终是生成so文件，也被称为可执行文件的一种，但是动态库并不需要链接全部文件，有些依赖的文件只需要给出头文件即可
+
+
+
+add_definitions(-DUSE_WEBSOCKET -DNO_SSL)
+
 add_library(websocket SHARED
         websocket_plugin.cpp
         websocket_server.cpp
-        websocket_client.cpp)
+        websocket_client.cpp
+        ${PROJECT_SOURCE_DIR}/3rd/civetweb/src/CivetServer.cpp
+        ${PROJECT_SOURCE_DIR}/3rd/civetweb/src/civetweb.cpp)
 
 target_link_libraries(websocket
         PUBLIC pthread)

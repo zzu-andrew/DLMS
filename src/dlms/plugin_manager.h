@@ -6,23 +6,26 @@
 #define DLMS_PLUGIN_MANAGER_H
 #include <map>
 #include <string>
-
+#include <memory>
 
 #include "plugin.h"
 
 
 class PluginManager {
 public:
-    int32_t LoadPlugin(const std::string& path, const std::string& pluginName);
+    typedef std::map<std::string, std::map<std::string, Plugin*>> PluginsMap;
 
-    int32_t LoadPlugin(const std::string& path);
+    Status LoadPlugin(const std::string& path, const std::string& pluginName);
 
-    Plugin *GetPlugin(const std::string& pluginName);
+    Status LoadPlugin();
 
+    Plugin *GetPlugin(const std::string& pluginName, std::string& type);
+
+    PluginsMap &GetPluginsMap() { return mapPlugins; }
 
 
 private:
-    std::map<std::string, Plugin*> mapPlugins;
+    PluginsMap mapPlugins;
 
 };
 

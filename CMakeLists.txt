@@ -3,8 +3,11 @@ project (DLMS
         VERSION 0.1.0
         DESCRIPTION "Distributed Linux monitoring system"
         HOMEPAGE_URL https://github.com/zzu-andrew/DLMS
-        LANGUAGES CXX
+        LANGUAGES CXX C
         )
+
+add_definitions("-O0 -g -Wall")
+
 
 # Linux 分布式监控系统
 set (CPACK_PACKAGE_NAME DLMS)
@@ -41,7 +44,8 @@ target_include_directories(dlms
 target_link_directories(dlms
         PUBLIC lib)
 target_link_libraries(dlms
-        PUBLIC glog)
+        PUBLIC glog
+        PUBLIC dl)
 
 # 编译依赖，如果添加依赖编译时会将对应的目标也进行编译
 add_dependencies(dlms websocket)

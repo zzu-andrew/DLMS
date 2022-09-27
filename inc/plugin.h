@@ -14,16 +14,14 @@
  * */
 
 // 服务函数根据类型进行参数和返回值的确认
-enum PluginServiceType
-{
-    String  = 0x1,
-    JSON    = 0x2,
-    Binary  = 0x4,
+enum PluginServiceType {
+    String = 0x1,
+    JSON = 0x2,
+    Binary = 0x4,
     Integer = 0x8,
 };
 
-enum NotifyTypes
-{
+enum NotifyTypes {
     NetBroken = 0,
     Quit = 1,
 };
@@ -32,11 +30,11 @@ class IContext;
 class Plugin {
 public:
     enum PluginStatus : uint8_t {
-        PLUGIN_UNKNOWN             = 0,
-        PLUGIN_INIT                = 1,
-        PLUGIN_RUNNING             = 2,
-        PLUGIN_STOP                = 3,
-        PLUGIN_Reset               = 4,
+        PLUGIN_UNKNOWN = 0,
+        PLUGIN_INIT = 1,
+        PLUGIN_RUNNING = 2,
+        PLUGIN_STOP = 3,
+        PLUGIN_Reset = 4,
     };
     //
 
@@ -48,7 +46,7 @@ public:
      *
      * @param lpIDlms 主框架对象指针
      */
-    virtual Status Init(IContext *lpIDlms, std::string& pluginName) = 0;
+    virtual Status Init(IContext *lpIDlms, std::string pluginName) = 0;
 
     virtual Status Start() = 0;
 
@@ -57,30 +55,30 @@ public:
     virtual Status Reset() = 0;
 
     // 获取插件名字
-    virtual std::string GetHandleName() = 0;
+    virtual std::string GetName() = 0;
 
-    virtual Status SendAndReceive(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) = 0;
+    virtual Status SendSync(PluginServiceType in, void *lpInData, PluginServiceType out, void *lpOutData) = 0;
 
-    virtual Status Send(PluginServiceType in, void *lpInData) = 0;
+    virtual Status SendAsync(PluginServiceType in, void *lpInData) = 0;
 
     virtual Status Notify(PluginServiceType in, void *lpInData) = 0;
 
-    virtual bool ServiceSupport(PluginServiceType serviceType) = 0;
+    virtual Status PostMessage(PluginServiceType in, void *lpInData) = 0;
+
+    virtual bool Support(PluginServiceType serviceType) = 0;
 
 protected:
-    volatile PluginStatus       pluginStatus{PLUGIN_UNKNOWN};
-    uint32_t serviceSupportList;
-    std::string handleName; // name of the plugin
+    volatile PluginStatus pluginStatus{PLUGIN_UNKNOWN};
+    std::string pluginType;
 };
 
 #ifdef __cplusplus
 extern "C" {
-const char* GetVersion();
-Plugin *CreatePlugin(const char* pluginName);
+const char *GetVersion();
+Plugin *CreatePlugin(const char *pluginType);
+void DeletePlugin(Plugin *plugin);
 }
 
 #endif
-
-
 
 #endif //DLMS_PLUGIN_H

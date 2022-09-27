@@ -241,9 +241,7 @@ class CIVETWEB_CXX_API CivetWebSocketHandler
 	/**
 	 * Destructor
 	 */
-	virtual ~CivetWebSocketHandler()
-	{
-	}
+	virtual ~CivetWebSocketHandler() = default;
 
 	/**
 	 * Callback method for when the client intends to establish a websocket
