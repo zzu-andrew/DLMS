@@ -41,6 +41,8 @@ public:
 public:
     virtual ~Plugin() = default;
 
+    virtual void *GetInterface(const char *uuid) = 0;
+
     /**
      * @brief 插件初始化
      *

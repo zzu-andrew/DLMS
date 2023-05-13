@@ -44,9 +44,7 @@ public:
     }
     // 在所有插件停止结束之后这里才能停止
     void Stop() {
-        std::unique_lock<std::mutex> lock(mux);
         threadStatus = Stopping;
-        lock.unlock();
         cv.notify_all();
         for (auto& dispatchThread : threadPool) {
             dispatchThread->join();

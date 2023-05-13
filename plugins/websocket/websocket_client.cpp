@@ -6,7 +6,6 @@
 
 #include "websocket_client.h"
 
-
 /* User defined client data structure */
 struct tclient_data {
 
@@ -22,29 +21,20 @@ struct tmsg_list_elem {
     struct tmsg_list_elem *next;
 };
 
-
 /* Helper function to get a printable name for websocket opcodes */
 static const char *
-msgtypename(int flags)
-{
-    unsigned f = (unsigned)flags & 0xFu;
+msgtypename(int flags) {
+    unsigned f = (unsigned) flags & 0xFu;
     switch (f) {
-        case MG_WEBSOCKET_OPCODE_CONTINUATION:
-            return "continuation";
-        case MG_WEBSOCKET_OPCODE_TEXT:
-            return "text";
-        case MG_WEBSOCKET_OPCODE_BINARY:
-            return "binary";
-        case MG_WEBSOCKET_OPCODE_CONNECTION_CLOSE:
-            return "connection close";
-        case MG_WEBSOCKET_OPCODE_PING:
-            return "PING";
-        case MG_WEBSOCKET_OPCODE_PONG:
-            return "PONG";
+        case MG_WEBSOCKET_OPCODE_CONTINUATION:return "continuation";
+        case MG_WEBSOCKET_OPCODE_TEXT:return "text";
+        case MG_WEBSOCKET_OPCODE_BINARY:return "binary";
+        case MG_WEBSOCKET_OPCODE_CONNECTION_CLOSE:return "connection close";
+        case MG_WEBSOCKET_OPCODE_PING:return "PING";
+        case MG_WEBSOCKET_OPCODE_PONG:return "PONG";
     }
     return "unknown";
 }
-
 
 /* Callback for handling data received from the server */
 static int
@@ -52,9 +42,8 @@ websocket_client_data_handler(struct mg_connection *conn,
                               int flags,
                               char *data,
                               size_t data_len,
-                              void *user_data)
-{
-    struct tclient_data *pclient_data = (struct tclient_data *)user_data;
+                              void *user_data) {
+    struct tclient_data *pclient_data = (struct tclient_data *) user_data;
     time_t now = time(NULL);
 
     /* We may get some different message types (websocket opcodes).
@@ -68,7 +57,7 @@ websocket_client_data_handler(struct mg_connection *conn,
     /* Log output: We got some data */
     printf("%10.0f - Client received %lu bytes of %s data from server%s",
            difftime(now, pclient_data->started),
-           (long unsigned)data_len,
+           (long unsigned) data_len,
            msgtypename(flags),
            (is_text ? ": " : ".\n"));
 
@@ -103,7 +92,7 @@ websocket_client_data_handler(struct mg_connection *conn,
         printf("\n");
 
         /* ... and storing it (OOM ignored for simplicity). */
-        p = (struct tmsg_list_elem *)malloc(sizeof(struct tmsg_list_elem));
+        p = (struct tmsg_list_elem *) malloc(sizeof(struct tmsg_list_elem));
         p->timestamp = now;
         p->data = malloc(data_len);
         memcpy(p->data, data, data_len);
@@ -135,28 +124,23 @@ websocket_client_data_handler(struct mg_connection *conn,
     return 1;
 }
 
-
 /* Callback for handling a close message received from the server */
 static void
 websocket_client_close_handler(const struct mg_connection *conn,
-                               void *user_data)
-{
-    struct tclient_data *pclient_data = (struct tclient_data *)user_data;
+                               void *user_data) {
+    struct tclient_data *pclient_data = (struct tclient_data *) user_data;
 
     pclient_data->closed = time(NULL);
     printf("%10.0f - Client: Close handler\n",
            difftime(pclient_data->closed, pclient_data->started));
 }
 
-
 /* Websocket client test function */
-void
-run_websocket_client(const char *host,
-                     int port,
-                     int secure,
-                     const char *path,
-                     const char *greetings)
-{
+void run_websocket_client(const char *host,
+                          int port,
+                          int secure,
+                          const char *path,
+                          const char *greetings) {
     char err_buf[100] = {0};
     struct mg_connection *client_conn;
     struct tclient_data *pclient_data;
@@ -164,7 +148,7 @@ run_websocket_client(const char *host,
 
     /* Allocate some memory for callback specific data.
      * For simplicity, we ignore OOM handling in this example. */
-    pclient_data = (struct tclient_data *)malloc(sizeof(struct tclient_data));
+    pclient_data = (struct tclient_data *) malloc(sizeof(struct tclient_data));
 
     /* Store start time in the private structure */
     pclient_data->started = time(NULL);
@@ -216,7 +200,7 @@ run_websocket_client(const char *host,
                difftime(time(NULL), pclient_data->started));
         mg_websocket_client_write(client_conn,
                                   MG_WEBSOCKET_OPCODE_PING,
-                                  (const char *)&i,
+                                  (const char *) &i,
                                   sizeof(int));
         sleep(1);
     }
@@ -346,8 +330,8 @@ run_websocket_client(const char *host,
         while (*where != NULL) {
             printf("%10.0f - [%5lu] ",
                    difftime((*where)->timestamp, pclient_data->started),
-                   (unsigned long)(*where)->len);
-            fwrite((const char *)(*where)->data, 1, (*where)->len, stdout);
+                   (unsigned long) (*where)->len);
+            fwrite((const char *) (*where)->data, 1, (*where)->len, stdout);
             printf("\n");
 
             where = &((*where)->next);
@@ -373,19 +357,16 @@ run_websocket_client(const char *host,
     free(pclient_data);
 }
 
-
 Status WebsocketClient::Init(IContext *lpContext, std::string pluginName) {
     Websocket::Init(lpContext, pluginName);
     return Status::Ok();
 }
 
-
 Status WebsocketClient::Start() {
 
+    mg_init_library(0);
 
-	mg_init_library(0);
-
-    auto run = [this]()-> int32_t {
+    auto run = [this]() -> int32_t {
         printf("=========================================\n");
         run_websocket_client("127.0.0.1", 8081, 0, "/websocket", "Hello World!");
         return 0;
