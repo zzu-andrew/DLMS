@@ -1,6 +1,11 @@
-//
-// Created by andrew on 2022/2/21.
-//
+/**
+ * @file IContext.h
+ * @brief Interface for context operations in a system.
+ *
+ * This file contains the IContext interface which provides
+ * methods to initialize, start, stop, reset processes, and
+ * manage plugins.
+ */
 
 #ifndef DLMS_DLMS_BASH_H
 #define DLMS_DLMS_BASH_H
@@ -11,49 +16,77 @@
 
 
 class Plugin;
+/**
+ * @brief Interface for context operations.
+ *
+ * This class defines an interface for managing the lifecycle of 
+ * a process and handling plugins. 
+ */
 class IContext {
 public:
 
 
 public:
+    /// Destructor
     virtual ~IContext() = default;
 
     /**
-     * @brief 主进程初始化
+     * @brief Initializes the main process.
      *
-     * @return 0:成功，其他：失败
+     * This method is responsible for setting up the initial state
+     * of the main process.
+     *
+     * @return 0 if success, other values indicate failure.
      */
     virtual Status Init() = 0;
 
     /**
-     * @brief 启动主进程
+     * @brief Starts the main process.
      *
-     * @return 0:成功，其他：失败
+     * This method will start the execution of the main process.
+     *
+     * @return 0 if success, other values indicate failure.
      */
     virtual Status Start() = 0;
 
     /**
-     * @brief 停止主进程
+     * @brief Stops the main process.
      *
-     * @return 0:成功，其他：失败
+     * This method is called to stop the execution of the main process.
+     *
+     * @return 0 if success, other values indicate failure.
      */
     virtual Status Stop() = 0;
 
     /**
-     * @brief 退出主进程
+     * @brief Resets the main process.
      *
-     * @return 0:成功，其他：失败
+     * This method will reset the main process state.
+     *
+     * @return 0 if success, other values indicate failure.
      */
     virtual Status Reset() = 0;
 
     /**
-     * @brief 获取插件对象
+     * @brief Gets a plugin object.
      *
-     * @return nullptr:失败，其他：成功
+     * This method retrieves a plugin instance based on the plugin name
+     * and type provided.
+     *
+     * @param[in] pluginName The name of the plugin.
+     * @param[in] type The type of the plugin.
+     * @return A pointer to the plugin object if found, nullptr otherwise.
      */
     virtual Plugin *GetPlugin(std::string &pluginName, std::string &type) = 0;
 
-    // 将需要工作的线程放到Push里面
+    /**
+     * @brief Dispatches a work function to a thread.
+     *
+     * This method assigns a work function to be executed by a thread.
+     *
+     * @param[in] workFunction The function to be executed by the thread.
+     * @return 0 if success, other values indicate failure.
+     */
     virtual Status Dispatch(Func workFunction) = 0;
 };
 
