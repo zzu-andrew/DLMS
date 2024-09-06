@@ -1,79 +1,138 @@
-//
-// Created by wangyzhou on 2022/6/29.
-//
+/**
+ * @file Status.h
+ * @brief Definition of the Status class for error handling and reporting.
+ *
+ * This file contains the definition of the Status class, which provides
+ * utilities for creating and handling various statuses or outcomes of operations.
+ */
 
 #ifndef DLMS_STATUS_H
 #define DLMS_STATUS_H
 #include <string>
 #include <cstring>
 #include <cassert>
-
+/**
+ * @brief A class for representing the status or outcome of an operation.
+ *
+ * The Status class is used for error handling and reporting. It provides
+ * methods for creating different types of status messages, checking the 
+ * status type, and converting the status to a string representation.
+ */
 class Status {
 public:
-    // Create a success status.
-    Status() noexcept: state_(nullptr) {}
+    /// Create a success status.
+    Status() noexcept : state_(nullptr) {}
 
+    /// Destructor.
     ~Status() { delete[] state_; }
 
+    /// Copy constructor.
     Status(const Status &rhs);
 
+    /// Copy assignment operator.
     Status &operator=(const Status &rhs);
 
-    Status(Status &&rhs) noexcept: state_(rhs.state_) { rhs.state_ = nullptr; }
+    /// Move constructor.
+    Status(Status &&rhs) noexcept : state_(rhs.state_) { rhs.state_ = nullptr; }
 
+    /// Move assignment operator.
     Status &operator=(Status &&rhs) noexcept;
 
-    // Return a success status.
+    /// Return a success status.
     static Status Ok() { return Status(); }
 
-    // Return error status of an appropriate type.
+    /**
+     * @brief Return a NotFound status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating a NotFound error.
+     */
     static Status NotFound(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kNotFound, msg, msg2);
     }
-    // something is broken, IE.json format invlaide
+
+    /**
+     * @brief Return a Corruption status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating a Corruption error.
+     */
     static Status Corruption(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kCorruption, msg, msg2);
     }
 
+    /**
+     * @brief Return a NotSupported status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating a NotSupported error.
+     */
     static Status NotSupported(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kNotSupported, msg, msg2);
     }
 
+    /**
+     * @brief Return an InvalidArgument status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating an InvalidArgument error.
+     */
     static Status InvalidArgument(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kInvalidArgument, msg, msg2);
     }
 
+    /**
+     * @brief Return an IOError status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating an IOError.
+     */
     static Status IOError(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kIOError, msg, msg2);
     }
 
+    /**
+     * @brief Return an OutOfMemory status.
+     *
+     * @param msg Primary message.
+     * @param msg2 Secondary message (optional).
+     * @return A Status object indicating an OutOfMemory error.
+     */
     static Status OutOfMemory(const std::string &msg, const std::string &msg2 = std::string()) {
         return Status(kOutOfMemory, msg, msg2);
     }
 
-    // Returns true iff the status indicates success.
+    /// Returns true if the status indicates success.
     bool ok() const { return (state_ == nullptr); }
 
-    // Returns true iff the status indicates a NotFound error.
+    /// Returns true if the status indicates a NotFound error.
     bool IsNotFound() const { return code() == kNotFound; }
 
-    // Returns true iff the status indicates a Corruption error.
+    /// Returns true if the status indicates a Corruption error.
     bool IsCorruption() const { return code() == kCorruption; }
 
-    // Returns true iff the status indicates an IOError.
+    /// Returns true if the status indicates an IOError.
     bool IsIOError() const { return code() == kIOError; }
 
-    // Returns true iff the status indicates a NotSupportedError.
+    /// Returns true if the status indicates a NotSupported error.
     bool IsNotSupportedError() const { return code() == kNotSupported; }
 
-    // Returns true iff the status indicates an InvalidArgument.
+    /// Returns true if the status indicates an InvalidArgument error.
     bool IsInvalidArgument() const { return code() == kInvalidArgument; }
 
-    // Returns true iff the status indicates an InvalidArgument.
+    /// Returns true if the status indicates an OutOfMemory error.
     bool IsOutOfMemory() const { return code() == kOutOfMemory; }
 
-    // Return a string representation of this status suitable for printing.
-    // Returns the string "OK" for success.
+    /**
+     * @brief Return a string representation of this status suitable for printing.
+     *
+     * @return A string representation of the status.
+     */
     std::string ToString() const {
         if (state_ == nullptr) {
             return "OK";
@@ -116,21 +175,36 @@ public:
         }
     }
 
-    private:
+private:
+    /**
+     * @brief Enum representing the different status codes.
+     */
     enum Code {
-        kOk = 0,
-        kNotFound = 1,
-        kCorruption = 2,
-        kNotSupported = 3,
-        kInvalidArgument = 4,
-        kIOError = 5,
-        kOutOfMemory = 6,
+        kOk = 0,            ///< Success status
+        kNotFound = 1,      ///< Not found error
+        kCorruption = 2,    ///< Corruption error
+        kNotSupported = 3,  ///< Not supported error
+        kInvalidArgument = 4,///< Invalid argument error
+        kIOError = 5,       ///< I/O error
+        kOutOfMemory = 6,   ///< Out of memory error
     };
 
+    /**
+     * @brief Get the status code.
+     *
+     * @return The status code of this status.
+     */
     Code code() const {
         return (state_ == nullptr) ? kOk : static_cast<Code>(state_[4]);
     }
 
+    /**
+     * @brief Constructor to create a status with a specific code and messages.
+     *
+     * @param code The status code.
+     * @param msg The primary message.
+     * @param msg2 The secondary message (optional).
+     */
     Status(Code code, const std::string &msg, const std::string &msg2) {
         assert(code != kOk);
         const auto len1 = static_cast<uint32_t>(msg.size());
@@ -148,6 +222,14 @@ public:
         state_ = result;
     }
 
+    /**
+     * @brief Copy the internal state.
+     *
+     * This method creates a copy of the given state.
+     *
+     * @param state The state to copy.
+     * @return A pointer to the copied state.
+     */
     static const char *CopyState(const char *state) {
         uint32_t size;
         std::memcpy(&size, state, sizeof(size));
@@ -156,18 +238,16 @@ public:
         return result;
     }
 
-    // OK status has a null state_.  Otherwise, state_ is a new[] array
-    // of the following form:
-    //    state_[0..3] == length of message
-    //    state_[4]    == code
-    //    state_[5..]  == message
+    /// The internal state of the status. OK status has a null state_.
     const char *state_;
 };
 
+/// Copy constructor implementation.
 inline Status::Status(const Status &rhs) {
     state_ = (rhs.state_ == nullptr) ? nullptr : CopyState(rhs.state_);
 }
 
+/// Copy assignment operator implementation.
 inline Status &Status::operator=(const Status &rhs) {
     // The following condition catches both aliasing (when this == &rhs),
     // and the common case where both rhs and *this are ok.
@@ -178,6 +258,7 @@ inline Status &Status::operator=(const Status &rhs) {
     return *this;
 }
 
+/// Move assignment operator implementation.
 inline Status &Status::operator=(Status &&rhs) noexcept {
     std::swap(state_, rhs.state_);
     return *this;
