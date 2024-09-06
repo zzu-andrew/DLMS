@@ -14,6 +14,8 @@ class Websocket : public Plugin {
 public:
     ~Websocket() override;
 
+    void *GetInterface(const char *uuid) override;
+
     Status Init(IContext *lpContext, std::string pluginName) override;
 
     Status Start() override;

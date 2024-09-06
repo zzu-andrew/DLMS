@@ -52,8 +52,15 @@ Status Websocket::SendAsync(PluginServiceType in, void *lpInData) {
 bool Websocket::Support(PluginServiceType serviceType) {
     return false;
 }
+
 Status Websocket::PostMessage(PluginServiceType in, void *lpInData) {
     return Status();
+}
+
+void *Websocket::GetInterface(const char *uuid) {
+
+
+    return nullptr;
 }
 
 #ifdef __cplusplus
